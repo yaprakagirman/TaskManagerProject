@@ -1,0 +1,10 @@
+<Solution>
+  <Project Path="TaskManager.Application.Tests/TaskManager.Application.Tests.csproj" Id="2910b8ed-57a5-4904-816e-deeb5838d27f" />
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
+  <Project Path="TaskManager.API/TaskManager.API.csproj" />
+  <Project Path="TaskManager.Application/TaskManager.Application.csproj" />
+  <Project Path="TaskManager.Domain/TaskManager.Domain.csproj" />
+  <Project Path="TaskManager.Infrastructure/TaskManager.Infrastructure.csproj" />
+</Solution>

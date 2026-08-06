@@ -1,0 +1,18 @@
+<Project ToolsVersion="15.0" Sdk="Microsoft.Docker.Sdk">
+  <PropertyGroup Label="Globals">
+    <ProjectVersion>2.1</ProjectVersion>
+    <DockerTargetOS>Linux</DockerTargetOS>
+    <ProjectGuid>415ce803-814c-40eb-a2d7-13a646aceb99</ProjectGuid>
+    <DockerComposeProjectName>taskmanagerproject</DockerComposeProjectName>
+    <DockerComposeEnvFilePath>.env</DockerComposeEnvFilePath>
+    <DockerDevelopmentMode>Regular</DockerDevelopmentMode>
+    <DependencyAwareStart>true</DependencyAwareStart>
+    <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
+    <DockerServiceName>api</DockerServiceName>
+    <DockerServiceUrl>{Scheme}://{ServiceIPAddress}:{ServicePort}/swagger</DockerServiceUrl>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="docker-compose.yml" />
+    <None Include=".dockerignore" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,24 @@
+# Local secrets and environment files
+.env
+.env.*
+!.env.example
+
+# Visual Studio and IDE state
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# .NET build outputs
+**/bin/
+**/obj/
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+

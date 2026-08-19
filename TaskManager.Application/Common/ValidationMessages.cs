@@ -13,6 +13,21 @@ public static class ValidationMessages
         public const string EmailRequired = "Email is required.";
         public const string EmailInvalid = "Email format is not valid.";
         public const string EmailMaxLength = "Email cannot exceed 200 characters.";
+
+        public const string UserIdGreaterThanZero =
+            "User ID must be greater than zero.";
+
+        public const string ExpertisesRequired =
+            "Expertises list cannot be null.";
+
+        public const string ExpertisesUnique =
+            "Expertise values must be unique.";
+
+        public const string NoneExpertiseCannotBeCombined =
+            "None cannot be combined with another expertise.";
+
+        public const string ExpertiseInvalid =
+            "Each expertise must be Backend, Frontend, QA, or DevOps.";
     }
 
     public static class Auth
@@ -67,5 +82,8 @@ public static class ValidationMessages
 
         public const string TagIdGreaterThanZero =
             "Tag ID must be greater than zero.";
+
+        public const string RequiredExpertiseInvalid =
+            "Required expertise must be None, Backend, Frontend, QA, DevOps, or null.";
     }
 }

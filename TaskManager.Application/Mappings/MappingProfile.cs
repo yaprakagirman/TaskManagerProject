@@ -12,6 +12,7 @@ public class MappingProfile : Profile
     public MappingProfile()
     {
         CreateMap<User, UserResponse>();
+        CreateMap<User, EligibleUserResponse>();
         CreateMap<CreateUserRequest, User>(MemberList.Source);
         CreateMap<UpdateUserRequest, User>(MemberList.Source);
 

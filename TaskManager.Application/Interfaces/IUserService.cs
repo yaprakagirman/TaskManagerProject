@@ -17,4 +17,8 @@ public interface IUserService
     Task<UserResponse> UpdateUserRoleAsync(
     int userId,
     UpdateUserRoleRequest request);
+
+    Task<UserResponse> UpdateUserExpertisesAsync(
+        int userId,
+        UpdateUserExpertisesRequest request);
 }

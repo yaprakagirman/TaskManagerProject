@@ -34,8 +34,16 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .HasConversion<int>()
             .HasDefaultValue(UserRole.User);
 
+        entity.Property(user => user.Expertises)
+            .IsRequired()
+            .HasConversion<int>()
+            .HasDefaultValue(UserExpertise.None);
+
         entity.HasIndex(user => user.Email)
-            .IsUnique();
+            .IsUnique()
+            .HasFilter("\"IsDeleted\" = FALSE");
+
+        entity.HasQueryFilter(user => !user.IsDeleted);
 
         entity.Property(user => user.CreatedDate)
             .IsRequired();

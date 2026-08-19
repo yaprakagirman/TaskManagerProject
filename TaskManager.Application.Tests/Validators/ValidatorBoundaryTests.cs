@@ -117,6 +117,51 @@ public class ValidatorBoundaryTests
         Assert.Contains(result.Errors, error => error.PropertyName == "Role");
     }
 
+    [Fact]
+    public void UpdateUserExpertisesRequestValidator_DuplicateExpertise_HasError()
+    {
+        var result = new UpdateUserExpertisesRequestValidator().Validate(
+            new UpdateUserExpertisesRequest
+            {
+                Expertises = [UserExpertise.Backend, UserExpertise.Backend]
+            });
+
+        Assert.Contains(result.Errors, error => error.PropertyName == "Expertises");
+    }
+
+    [Fact]
+    public void UpdateUserExpertisesRequestValidator_NoneCombinedWithBackend_HasError()
+    {
+        var result = new UpdateUserExpertisesRequestValidator().Validate(
+            new UpdateUserExpertisesRequest
+            {
+                Expertises = [UserExpertise.None, UserExpertise.Backend]
+            });
+
+        Assert.Contains(result.Errors, error => error.PropertyName == "Expertises");
+    }
+
+    [Fact]
+    public void UpdateUserExpertisesRequestValidator_UndefinedExpertise_HasError()
+    {
+        var result = new UpdateUserExpertisesRequestValidator().Validate(
+            new UpdateUserExpertisesRequest
+            {
+                Expertises = [(UserExpertise)16]
+            });
+
+        Assert.Contains(result.Errors, error => error.PropertyName == "Expertises");
+    }
+
+    [Fact]
+    public void UpdateUserExpertisesRequestValidator_NullList_HasError()
+    {
+        var result = new UpdateUserExpertisesRequestValidator().Validate(
+            new UpdateUserExpertisesRequest { Expertises = null });
+
+        Assert.Contains(result.Errors, error => error.PropertyName == "Expertises");
+    }
+
     [Theory]
     [InlineData("")]
     [InlineData("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")]
@@ -125,5 +170,22 @@ public class ValidatorBoundaryTests
         var result = new TagRequestValidator().Validate(new TagRequest { Name = name });
 
         Assert.Contains(result.Errors, error => error.PropertyName == "Name");
+    }
+
+    [Theory]
+    [InlineData(3)]
+    [InlineData(16)]
+    public void TagRequestValidator_CombinedOrUndefinedRequiredExpertise_HasError(
+        int requiredExpertise)
+    {
+        var result = new TagRequestValidator().Validate(new TagRequest
+        {
+            Name = "backend",
+            RequiredExpertise = (UserExpertise)requiredExpertise
+        });
+
+        Assert.Contains(
+            result.Errors,
+            error => error.PropertyName == "RequiredExpertise");
     }
 }

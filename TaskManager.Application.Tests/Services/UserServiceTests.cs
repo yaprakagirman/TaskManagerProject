@@ -79,4 +79,89 @@ public class UserServiceTests
         _repository.Verify(repository => repository.Update(It.IsAny<User>()), Times.Never);
         _unitOfWork.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Never);
     }
+
+    [Fact]
+    public async Task UpdateUserExpertisesAsync_BackendAndQa_StoresCombinedFlags()
+    {
+        var user = new User { Id = 4 };
+        _repository.Setup(repository => repository.GetByIdAsync(4)).ReturnsAsync(user);
+        _unitOfWork.Setup(unitOfWork => unitOfWork.SaveChangesAsync()).ReturnsAsync(1);
+        _mapper.Setup(mapper => mapper.Map<UserResponse>(user))
+            .Returns(() => new UserResponse
+            {
+                Id = user.Id,
+                Expertises = user.Expertises
+            });
+
+        var result = await _service.UpdateUserExpertisesAsync(
+            4,
+            new UpdateUserExpertisesRequest
+            {
+                Expertises = [UserExpertise.Backend, UserExpertise.QA]
+            });
+
+        Assert.Equal(
+            UserExpertise.Backend | UserExpertise.QA,
+            user.Expertises);
+        Assert.Equal(user.Expertises, result.Expertises);
+        _repository.Verify(repository => repository.Update(user), Times.Once);
+        _unitOfWork.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateUserExpertisesAsync_EmptyList_StoresNone()
+    {
+        var user = new User
+        {
+            Id = 4,
+            Expertises = UserExpertise.Backend
+        };
+        _repository.Setup(repository => repository.GetByIdAsync(4)).ReturnsAsync(user);
+        _unitOfWork.Setup(unitOfWork => unitOfWork.SaveChangesAsync()).ReturnsAsync(1);
+        _mapper.Setup(mapper => mapper.Map<UserResponse>(user))
+            .Returns(() => new UserResponse
+            {
+                Id = user.Id,
+                Expertises = user.Expertises
+            });
+
+        var result = await _service.UpdateUserExpertisesAsync(
+            4,
+            new UpdateUserExpertisesRequest { Expertises = [] });
+
+        Assert.Equal(UserExpertise.None, user.Expertises);
+        Assert.Equal(UserExpertise.None, result.Expertises);
+    }
+
+    [Fact]
+    public async Task UpdateUserExpertisesAsync_UserDoesNotExist_ThrowsNotFoundWithoutSaving()
+    {
+        _repository
+            .Setup(repository => repository.GetByIdAsync(99))
+            .ReturnsAsync((User?)null);
+
+        await Assert.ThrowsAsync<NotFoundException>(() =>
+            _service.UpdateUserExpertisesAsync(
+                99,
+                new UpdateUserExpertisesRequest
+                {
+                    Expertises = [UserExpertise.Backend]
+                }));
+
+        _repository.Verify(repository => repository.Update(It.IsAny<User>()), Times.Never);
+        _unitOfWork.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task UpdateUserExpertisesAsync_NonPositiveUserId_ThrowsBadRequest()
+    {
+        await Assert.ThrowsAsync<BadRequestException>(() =>
+            _service.UpdateUserExpertisesAsync(
+                0,
+                new UpdateUserExpertisesRequest { Expertises = [] }));
+
+        _repository.Verify(
+            repository => repository.GetByIdAsync(It.IsAny<object[]>()),
+            Times.Never);
+    }
 }

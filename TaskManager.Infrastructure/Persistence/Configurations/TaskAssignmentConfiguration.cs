@@ -26,14 +26,18 @@ public sealed class TaskAssignmentConfiguration : IEntityTypeConfiguration<TaskA
         entity.Property(taskAssignment => taskAssignment.CompletedDate)
             .IsRequired(false);
 
+        entity.HasQueryFilter(taskAssignment =>
+            !taskAssignment.TaskItem.IsDeleted &&
+            !taskAssignment.AssignedUser.IsDeleted);
+
         entity.HasOne(taskAssignment => taskAssignment.TaskItem)
             .WithMany(task => task.TaskAssignments)
             .HasForeignKey(taskAssignment => taskAssignment.TaskItemId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
         entity.HasOne(taskAssignment => taskAssignment.AssignedUser)
             .WithMany(user => user.TaskAssignments)
             .HasForeignKey(taskAssignment => taskAssignment.AssignedUserId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

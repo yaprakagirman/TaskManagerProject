@@ -104,8 +104,7 @@ public class AuthService : IAuthService
             FirstName = request.FirstName,
             LastName = request.LastName,
             Email = request.Email,
-            PasswordHash = _passwordHasherService.HashPassword(request.Password),
-            CreatedDate = DateTime.UtcNow
+            PasswordHash = _passwordHasherService.HashPassword(request.Password)
         };
     }
 

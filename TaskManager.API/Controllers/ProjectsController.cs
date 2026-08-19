@@ -53,6 +53,8 @@ public class ProjectsController : BaseApiController
     }
 
     [HttpPost]
+    [ProducesResponseType(typeof(ProjectResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public Task<ActionResult<ProjectResponse>> Create(
     [FromBody] CreateProjectRequest request)
     {
@@ -66,10 +68,7 @@ public class ProjectsController : BaseApiController
                 var response =
                     await _projectService.CreateAsync(request);
 
-                return CreatedAtAction(
-                    nameof(GetById),
-                    new { id = response.Id },
-                    response);
+                return Ok(response);
             });
     }
 

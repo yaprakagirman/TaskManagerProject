@@ -1,0 +1,32 @@
+name: TaskManager CI Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Restore Dependencies
+      run: dotnet restore TaskManager.slnx
+
+    - name: Build Solution
+      run: dotnet build TaskManager.slnx --no-restore -c Release
+
+    - name: Run Unit Tests
+      run: dotnet test TaskManager.Application.Tests/TaskManager.Application.Tests.csproj --no-restore -c Release --logger "console;verbosity=normal"
+
+    - name: Run Integration Tests
+      run: dotnet test TaskManager.API.IntegrationTests/TaskManager.API.IntegrationTests.csproj --no-restore -c Release --logger "console;verbosity=normal"

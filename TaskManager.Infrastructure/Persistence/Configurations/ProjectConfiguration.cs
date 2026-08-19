@@ -22,6 +22,8 @@ public sealed class ProjectConfiguration : IEntityTypeConfiguration<Project>
         entity.Property(project => project.CreatedDate)
             .IsRequired();
 
+        entity.HasQueryFilter(project => !project.IsDeleted);
+
         entity.HasMany(project => project.Tasks)
             .WithOne(task => task.Project)
             .HasForeignKey(task => task.ProjectId)

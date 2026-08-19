@@ -34,6 +34,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=TaskManagerDb;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+      Jwt__Key: ${JWT_SECRET:?JWT_SECRET is required}
       Serilog__WriteTo__0__Args__serverUrl: "http://seq:80"
     ports:
       - "8080:8080"

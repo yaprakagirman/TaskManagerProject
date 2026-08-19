@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TaskManager.Application.Interfaces;
 using TaskManager.Domain.Common;
 using TaskManager.Domain.Entities;
 
@@ -6,9 +7,14 @@ namespace TaskManager.Infrastructure.Persistence;
 
 public class AppDbContext : DbContext
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options)
+    private readonly ICurrentUserService? _currentUserService;
+
+    public AppDbContext(
+        DbContextOptions<AppDbContext> options,
+        ICurrentUserService? currentUserService = null)
         : base(options)
     {
+        _currentUserService = currentUserService;
     }
 
     public DbSet<User> Users { get; set; }
@@ -26,19 +32,56 @@ public class AppDbContext : DbContext
     private void UpdateAuditFields()
     {
         var currentDate = DateTime.UtcNow;
+        var currentUserId = _currentUserService?.UserId;
 
         foreach (var entry in ChangeTracker
                      .Entries<FullAuditedEntityBase>())
         {
-            if (entry.State == EntityState.Added)
+            switch (entry.State)
             {
-                entry.Entity.CreatedDate = currentDate;
-            }
-            else if (entry.State == EntityState.Modified)
-            {
-                entry.Entity.LastModifiedDate = currentDate;
+                case EntityState.Added:
+                    if (entry.Entity.CreatedDate == default)
+                    {
+                        entry.Entity.CreatedDate = currentDate;
+                    }
+
+                    entry.Entity.CreatorId ??= currentUserId;
+                    break;
+
+                case EntityState.Modified:
+                    PreserveCreationAudit(entry);
+                    entry.Entity.LastModifiedDate = currentDate;
+
+                    if (currentUserId.HasValue)
+                    {
+                        entry.Entity.LastModifierId = currentUserId;
+                    }
+
+                    break;
+
+                case EntityState.Deleted:
+                    entry.State = EntityState.Modified;
+                    PreserveCreationAudit(entry);
+                    entry.Entity.IsDeleted = true;
+                    entry.Entity.DeletedDate = currentDate;
+                    entry.Entity.DeleterId = currentUserId;
+                    break;
             }
         }
+    }
+
+    private static void PreserveCreationAudit(
+        Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<FullAuditedEntityBase> entry)
+    {
+        entry.Property(entity => entity.CreatedDate).IsModified = false;
+        entry.Property(entity => entity.CreatorId).IsModified = false;
+    }
+
+    public override int SaveChanges()
+    {
+        UpdateAuditFields();
+
+        return base.SaveChanges();
     }
 
     public override async Task<int> SaveChangesAsync(

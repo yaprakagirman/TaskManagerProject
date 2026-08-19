@@ -53,8 +53,6 @@ public class ProjectService : IProjectService
     {
         var project = _mapper.Map<Project>(request);
 
-        project.CreatedDate = DateTime.UtcNow;
-
         await _projectRepository.AddAsync(project);
         await _unitOfWork.SaveChangesAsync();
 

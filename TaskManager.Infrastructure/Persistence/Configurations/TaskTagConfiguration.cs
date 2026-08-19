@@ -19,14 +19,18 @@ public sealed class TaskTagConfiguration : IEntityTypeConfiguration<TaskTag>
         })
         .IsUnique();
 
+        entity.HasQueryFilter(taskTag =>
+            !taskTag.TaskItem.IsDeleted &&
+            !taskTag.Tag.IsDeleted);
+
         entity.HasOne(taskTag => taskTag.TaskItem)
             .WithMany(task => task.TaskTags)
             .HasForeignKey(taskTag => taskTag.TaskItemId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
         entity.HasOne(taskTag => taskTag.Tag)
             .WithMany(tag => tag.TaskTags)
             .HasForeignKey(taskTag => taskTag.TagId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

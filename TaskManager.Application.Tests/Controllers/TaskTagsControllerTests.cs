@@ -53,6 +53,18 @@ public class TaskTagsControllerTests
             Times.Once);
     }
 
+    [Fact]
+    public async Task Remove_UsesTaskTagIdAndReturnsNoContent()
+    {
+        var taskTagService = new Mock<ITaskTagService>();
+        var controller = CreateController(taskTagService);
+
+        var result = await controller.Remove(20);
+
+        Assert.IsType<NoContentResult>(result);
+        taskTagService.Verify(service => service.RemoveAsync(20), Times.Once);
+    }
+
     private static TaskTagsController CreateController(
         Mock<ITaskTagService> taskTagService)
     {

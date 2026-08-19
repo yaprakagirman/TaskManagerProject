@@ -1,6 +1,4 @@
-using System.Security.Claims;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using TaskManager.API.Controllers;
@@ -43,8 +41,8 @@ public class TasksControllerTests
 
         var result = await controller.Create(request);
 
-        var created = Assert.IsType<CreatedAtActionResult>(result.Result);
-        var response = Assert.IsType<TaskResponse>(created.Value);
+        var ok = Assert.IsType<OkObjectResult>(result.Result);
+        var response = Assert.IsType<TaskResponse>(ok.Value);
         Assert.Equal(42, response.CreatedByUserId);
         taskService.Verify(service => service.CreateTaskAsync(request, 42), Times.Once);
     }
@@ -118,25 +116,29 @@ public class TasksControllerTests
     {
         var controller = new TasksController(
             taskService.Object,
+            CreateCurrentUserService(claimValue),
             assignmentService?.Object ?? Mock.Of<ITaskAssignmentService>(),
             Mock.Of<ITaskHierarchyService>(),
             new CreateTaskRequestValidator(),
             new UpdateTaskRequestValidator(),
             new AssignTaskRequestValidator(),
-            new UpdateTaskStatusRequestValidator());
-
-        var claims = claimValue is null
-            ? Array.Empty<Claim>()
-            : [new Claim(ClaimTypes.NameIdentifier, claimValue)];
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext
-            {
-                User = new ClaimsPrincipal(new ClaimsIdentity(claims, "Test"))
-            }
-        };
+            new UpdateTaskStatusRequestValidator(),
+            new TaskQueryRequestValidator(),
+            new TransferTaskAssignmentRequestValidator());
 
         return controller;
+    }
+
+    private static ICurrentUserService CreateCurrentUserService(
+        string? claimValue)
+    {
+        var currentUserService = new Mock<ICurrentUserService>();
+        currentUserService
+            .Setup(service => service.UserId)
+            .Returns(int.TryParse(claimValue, out var userId) && userId > 0
+                ? userId
+                : null);
+
+        return currentUserService.Object;
     }
 }

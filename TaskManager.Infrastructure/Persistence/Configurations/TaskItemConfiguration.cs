@@ -35,6 +35,8 @@ public sealed class TaskItemConfiguration : IEntityTypeConfiguration<TaskItem>
         entity.Property(task => task.DueDate)
             .IsRequired(false);
 
+        entity.HasQueryFilter(task => !task.IsDeleted);
+
         entity.HasOne(task => task.ParentTask)
             .WithMany(task => task.Subtasks)
             .HasForeignKey(task => task.ParentTaskId)

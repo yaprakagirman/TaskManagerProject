@@ -2,6 +2,7 @@ using AutoMapper;
 using Microsoft.Extensions.Logging;
 using TaskManager.Application.Common.Exceptions;
 using TaskManager.Application.DTOs.Tasks;
+using TaskManager.Application.DTOs.Common;
 using TaskManager.Application.Interfaces;
 using TaskManager.Domain.Entities;
 using TaskManager.Domain.Enums;
@@ -13,6 +14,7 @@ public class TaskService : ITaskService
     private readonly IRepository<TaskItem> _taskRepository;
     private readonly IRepository<User> _userRepository;
     private readonly ITaskDetailRepository _taskDetailRepository;
+    private readonly ITaskQueryRepository _taskQueryRepository;
     private readonly ITaskHierarchyService _taskHierarchyService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
@@ -22,6 +24,7 @@ public class TaskService : ITaskService
         IRepository<TaskItem> taskRepository,
         IRepository<User> userRepository,
         ITaskDetailRepository taskDetailRepository,
+        ITaskQueryRepository taskQueryRepository,
         ITaskHierarchyService taskHierarchyService,
         IUnitOfWork unitOfWork,
         IMapper mapper,
@@ -30,19 +33,39 @@ public class TaskService : ITaskService
         _taskRepository = taskRepository;
         _userRepository = userRepository;
         _taskDetailRepository = taskDetailRepository;
+        _taskQueryRepository = taskQueryRepository;
         _taskHierarchyService = taskHierarchyService;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _logger = logger;
     }
 
-    public async Task<List<TaskResponse>> GetAllTasksAsync()
+    public Task<PagedResponse<TaskResponse>> GetTasksAsync(
+        TaskQueryRequest request,
+        CancellationToken cancellationToken = default)
     {
-        var tasks = await _taskRepository.GetAllAsync();
+        return _taskQueryRepository.GetPagedAsync(request, cancellationToken: cancellationToken);
+    }
 
-        _logger.LogInformation("All tasks listed. Count: {TaskCount}", tasks.Count);
+    public Task<PagedResponse<TaskResponse>> GetMyTasksAsync(
+        TaskQueryRequest request,
+        int userId,
+        CancellationToken cancellationToken = default)
+    {
+        return _taskQueryRepository.GetPagedAsync(request, userId, cancellationToken: cancellationToken);
+    }
 
-        return _mapper.Map<List<TaskResponse>>(tasks);
+    public Task<PagedResponse<TaskResponse>> GetDeletedTasksAsync(
+        TaskQueryRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        return _taskQueryRepository.GetPagedAsync(request, deletedOnly: true, cancellationToken: cancellationToken);
+    }
+
+    public async Task RestoreTaskAsync(int id, CancellationToken cancellationToken = default)
+    {
+        await _taskQueryRepository.RestoreAsync(id, cancellationToken);
+        _logger.LogInformation("Task restored successfully. TaskId: {TaskId}", id);
     }
 
     public async Task<TaskDetailResponse?> GetTaskDetailAsync(int id)
@@ -80,7 +103,6 @@ public class TaskService : ITaskService
         task.CreatedByUserId = createdByUserId;
         task.ProjectId = projectId;
         task.Status = TaskItemStatus.Pending;
-        task.CreatedDate = DateTime.UtcNow;
 
         await _taskRepository.AddAsync(task);
         await _unitOfWork.SaveChangesAsync();

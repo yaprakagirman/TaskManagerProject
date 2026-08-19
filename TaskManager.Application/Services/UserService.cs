@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using TaskManager.Application.DTOs.Users;
 using TaskManager.Application.Interfaces;
 using TaskManager.Domain.Entities;
+using TaskManager.Domain.Enums;
 
 using TaskManager.Application.Common.Exceptions;
 
@@ -163,6 +164,46 @@ public class UserService : IUserService
             "User role updated successfully. UserId: {UserId}, NewRole: {NewRole}",
             userId,
             request.Role);
+
+        return _mapper.Map<UserResponse>(user);
+    }
+
+    public async Task<UserResponse> UpdateUserExpertisesAsync(
+        int userId,
+        UpdateUserExpertisesRequest request)
+    {
+        if (userId <= 0)
+        {
+            throw new BadRequestException(
+                "User ID must be greater than zero.");
+        }
+
+        var user = await _userRepository.GetByIdAsync(userId);
+
+        if (user is null)
+        {
+            _logger.LogWarning(
+                "User expertise update failed. User not found. UserId: {UserId}",
+                userId);
+
+            throw new NotFoundException("User was not found.");
+        }
+
+        var expertises = request.Expertises
+            ?? throw new BadRequestException(
+                "Expertises list cannot be null.");
+
+        user.Expertises = expertises.Aggregate(
+            UserExpertise.None,
+            (combined, expertise) => combined | expertise);
+
+        _userRepository.Update(user);
+        await _unitOfWork.SaveChangesAsync();
+
+        _logger.LogInformation(
+            "User expertises updated successfully. UserId: {UserId}, Expertises: {Expertises}",
+            userId,
+            user.Expertises);
 
         return _mapper.Map<UserResponse>(user);
     }

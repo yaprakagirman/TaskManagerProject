@@ -41,7 +41,7 @@ public class TagsController : BaseApiController
     [HttpPost]
     [ProducesResponseType(
     typeof(TagResponse),
-    StatusCodes.Status201Created)]
+    StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public Task<ActionResult<TagResponse>> Create(
     [FromBody] TagRequest request)
@@ -54,10 +54,7 @@ public class TagsController : BaseApiController
                 var createdTag =
                     await _tagService.CreateAsync(request);
 
-                return CreatedAtAction(
-                    nameof(GetById),
-                    new { id = createdTag.Id },
-                    createdTag);
+                return Ok(createdTag);
             });
     }
 

@@ -26,6 +26,9 @@ public class AuthController : BaseApiController
     }
 
     [HttpPost("register")]
+    [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request)
     {
         return ValidateAndExecute<RegisterRequest, AuthResponse>(

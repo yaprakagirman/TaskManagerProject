@@ -19,7 +19,14 @@ public sealed class TagConfiguration : IEntityTypeConfiguration<Tag>
         entity.Property(tag => tag.CreatedDate)
             .IsRequired();
 
+        entity.Property(tag => tag.RequiredExpertise)
+            .HasConversion<int?>()
+            .IsRequired(false);
+
         entity.HasIndex(tag => tag.Name)
-            .IsUnique();
+            .IsUnique()
+            .HasFilter("\"IsDeleted\" = FALSE");
+
+        entity.HasQueryFilter(tag => !tag.IsDeleted);
     }
 }

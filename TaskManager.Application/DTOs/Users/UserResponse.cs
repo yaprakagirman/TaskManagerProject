@@ -10,5 +10,7 @@ public class UserResponse
 
     public string Email { get; set; } = string.Empty;
 
+    public TaskManager.Domain.Enums.UserExpertise Expertises { get; set; }
+
     public DateTime CreatedDate { get; set; }
 }

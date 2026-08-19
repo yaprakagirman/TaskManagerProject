@@ -99,10 +99,14 @@ namespace TaskManager.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<int?>("RequiredExpertise")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Name")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("\"IsDeleted\" = FALSE");
 
                     b.ToTable("Tags", (string)null);
                 });
@@ -254,6 +258,11 @@ namespace TaskManager.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<int>("Expertises")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -286,7 +295,8 @@ namespace TaskManager.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("Email")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("\"IsDeleted\" = FALSE");
 
                     b.ToTable("Users", (string)null);
                 });
@@ -296,13 +306,13 @@ namespace TaskManager.Infrastructure.Migrations
                     b.HasOne("TaskManager.Domain.Entities.User", "AssignedUser")
                         .WithMany("TaskAssignments")
                         .HasForeignKey("AssignedUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("TaskManager.Domain.Entities.TaskItem", "TaskItem")
                         .WithMany("TaskAssignments")
                         .HasForeignKey("TaskItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("AssignedUser");
@@ -340,13 +350,13 @@ namespace TaskManager.Infrastructure.Migrations
                     b.HasOne("TaskManager.Domain.Entities.Tag", "Tag")
                         .WithMany("TaskTags")
                         .HasForeignKey("TagId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("TaskManager.Domain.Entities.TaskItem", "TaskItem")
                         .WithMany("TaskTags")
                         .HasForeignKey("TaskItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Tag");

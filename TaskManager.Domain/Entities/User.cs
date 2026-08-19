@@ -15,6 +15,8 @@ public class User : FullAuditedEntityBase
 
     public UserRole Role { get; set; } = UserRole.User;
 
+    public UserExpertise Expertises { get; set; } = UserExpertise.None;
+
     public ICollection<TaskItem> CreatedTasks { get; set; } = new List<TaskItem>();
 
     public ICollection<TaskAssignment> TaskAssignments { get; set; } = new List<TaskAssignment>();
